@@ -1,5 +1,6 @@
 import argparse
 import openai
+import json
 import time
 import os
 import pyfiglet
@@ -8,7 +9,6 @@ from docx import Document
 
 # Thiết lập các thông số cho ChatGPT
 load_dotenv()
-openai.api_key = os.environ.get('OPENAI_API_KEY_CREATE')
 model_name = "gpt-3.5-turbo"
 
 # Hàm để tạo các câu trả lời từ câu hỏi đầu vào
@@ -83,23 +83,28 @@ def run_chatbot_with_file(input_path, output_path):
 
     document.save(output_path)
 
+def get_api_key(config):
+    with open(config, "r") as file:
+        json_data = json.load(file)
+
+    return json_data['OPENAI_API_KEY_CREATE']
+
 if __name__ == "__main__":
     ascii_banner = pyfiglet.figlet_format("ChatGPT Crawler")
     print(ascii_banner)
     print('                                               -- Created by Kieu Thanh Nam -- \n')
     parser = argparse.ArgumentParser()
+    parser.add_argument("-c", "--config", type=str, help="Path to the file config", required=True)
     parser.add_argument("-f", "--file", type=str, help="Path to the .txt file containing questions", required=True)
     parser.add_argument("-o", "--output", type=str, help="Path to the output .docx file", required=True)
     args = parser.parse_args()
 
-    if args.file:
-        try:
-            run_chatbot_with_file(args.file, args.output)
-            print('Success: Crawl thông tin thành công!')
-        except KeyboardInterrupt:
-            print("Có lỗi xảy ra, vui lòng chạy lại")
-            exit()
-        except Exception as e:
-            print(f"Có lỗi xảy ra: {e}")
-    else:
-        print("Error: Sử dụng file có đuôi .txt và sử dụng flag -f hoặc --file.")
+    try:
+        openai.api_key = get_api_key(args.config)
+        run_chatbot_with_file(args.file, args.output)
+        print('Success: Crawl thông tin thành công!')
+    except KeyboardInterrupt:
+        print("Lỗi xảy ra khi cố thoát chương trình, vui lòng chạy lại")
+        exit()
+    except Exception as e:
+        print(f"Có lỗi xảy ra: {e}")
