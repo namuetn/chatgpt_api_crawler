@@ -93,7 +93,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.file:
-        run_chatbot_with_file(args.file, args.output)
-        print('Success: Crawl thông tin thành công!')
+        try:
+            run_chatbot_with_file(args.file, args.output)
+            print('Success: Crawl thông tin thành công!')
+        except KeyboardInterrupt:
+            print("Có lỗi xảy ra, vui lòng chạy lại")
+            exit()
+        except Exception as e:
+            print(f"Có lỗi xảy ra: {e}")
     else:
         print("Error: Sử dụng file có đuôi .txt và sử dụng flag -f hoặc --file.")
